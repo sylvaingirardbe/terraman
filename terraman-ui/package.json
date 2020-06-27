@@ -95,6 +95,7 @@
   },
   "dependencies": {
     "@ng-bootstrap/ng-bootstrap": "6.1.0",
-    "angular-gauge": "3.1.2"
+    "angular-gauge": "3.1.2",
+    "bootstrap-icons": "1.0.0-alpha5"
   }
 }

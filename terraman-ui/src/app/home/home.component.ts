@@ -10,12 +10,22 @@ import { Observable } from 'rxjs';
 })
 export class HomeComponent implements OnInit {
   temperature$: Observable<number>;
+  setPoint$: Observable<number>;
   humidity$: Observable<number>;
 
   constructor(private router: Router, private climateService: ClimateService) { }
 
   ngOnInit(): void { 
     this.temperature$ = this.climateService.getTemperature();
+    this.setPoint$ = this.climateService.getSetpoint();
     this.humidity$ = this.climateService.getHumidity();
+  }
+
+  decreaseTemp(amount: number) {
+    this.climateService.decreaseSetpoint(amount);
+  }
+
+  increaseTemp(amount: number) {
+    this.climateService.increaseSetpoint(amount);
   }
 }
