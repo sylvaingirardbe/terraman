@@ -47,3 +47,26 @@ html, body {
     }
   }
 }
+
+mwl-gauge {
+  width: 150px;
+  height: 150px;
+  display: block;
+  padding: 10px;
+}
+mwl-gauge > .gauge > .dial {
+  stroke: linear-gradient(90deg, rgba(0,142,255,1) 0%, rgba(9,121,12,1) 50%, rgba(255,0,0,1) 100%);
+  stroke-width: 4;
+  fill: linear-gradient(90deg, rgba(0,142,255,1) 0%, rgba(9,121,12,1) 50%, rgba(255,0,0,1) 100%);
+}
+mwl-gauge > .gauge > .value {
+  stroke: rgb(47, 227, 255);
+  stroke-width: 2;
+  fill: rgba(0,0,0,0);
+}
+mwl-gauge > .gauge > .value-text {
+  fill: rgb(47, 227, 255);
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 1em;
+}
