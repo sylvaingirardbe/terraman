@@ -2,5 +2,5 @@
     "board": "arduino:avr:uno",
     "port": "COM3",
     "programmer": "AVR ISP",
-    "sketch": "sensors.ino"
+    "sketch": "terraman.ino"
 }
