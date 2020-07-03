@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "port": "COM3",
+    "port": "COM4",
     "programmer": "AVR ISP",
     "sketch": "terraman.ino"
 }
