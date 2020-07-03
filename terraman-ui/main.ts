@@ -1,8 +1,12 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 
+const serialport = require('serialport');
+
 let win: BrowserWindow = null;
+let serialPorts = [];
+
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
@@ -50,6 +54,22 @@ function createWindow(): BrowserWindow {
     win = null;
   });
 
+  ipcMain.on('getSerialPorts', async (event, args) => {
+    console.log('Received getSerialPorts');
+    try {
+      serialPorts = await serialport.list();
+      console.log('Ports', serialPorts);
+      event.reply('serialPortsReceived', serialPorts);
+
+      const port = new serialport(serialPorts[0].path);
+      port.on('readable', function () {
+        console.log('Data:', port.read())
+      });
+    } catch(err) {
+      event.reply('serialPortError', err);
+    }
+  });
+
   return win;
 }
 
@@ -79,7 +99,6 @@ try {
       createWindow();
     }
   });
-
 } catch (e) {
   // Catch Error
   // throw e;
