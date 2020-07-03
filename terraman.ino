@@ -75,8 +75,7 @@ void loop() {
     actOnError(error);
 
     outputStatus(temp, hum);
-
-    delay(1000);
+    delay(samplePeriod);
 }
 
 void outputStatus(double temp, double humidity) {
@@ -84,7 +83,7 @@ void outputStatus(double temp, double humidity) {
     Serial.print("{");
     Serial.print("\"temp\": " + String(temp) + ","); 
     Serial.print("\"humidity\": " + String(humidity) + ",");
-    Serial.print("\"heating\": " + bitRead(relay.getChannelState(), HEATING_CHANNEL - 1));
+    Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), HEATING_CHANNEL - 1)));
     Serial.print("}");
     Serial.println();
 
@@ -98,7 +97,6 @@ void actOnError(double error) {
         Serial.println("Turning heating off");
         relay.turn_off_channel(HEATING_CHANNEL);
     }
-    delay(3000);
 }
 
 double p(double value, double setPoint) {
