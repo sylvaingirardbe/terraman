@@ -60,7 +60,7 @@ void setup() {
 
 void loop() {
     //Read setpoint
-    Serial.println("REQ: SETPOINT");
+    Serial.println("REQ=SETPOINT");
     double setPoint = 0;
     while(setPoint <= 0) {
         setPoint = waitForReply().toDouble();
@@ -80,7 +80,7 @@ void loop() {
 
 void outputStatus(double temp, double humidity) {
     //Send sensor info
-    Serial.print("{");
+    Serial.print("STATUS={");
     Serial.print("\"temp\": " + String(temp) + ","); 
     Serial.print("\"humidity\": " + String(humidity) + ",");
     Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), HEATING_CHANNEL - 1)));

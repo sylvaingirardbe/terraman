@@ -3,12 +3,70 @@ import * as path from 'path';
 import * as url from 'url';
 
 const serialport = require('serialport');
+const Readline = require('@serialport/parser-readline');
+let port;
+let currentStatus;
+let setPoint = 30;
 
 let win: BrowserWindow = null;
 let serialPorts = [];
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
+
+const startSerialComm = async () => {
+  console.log('Create serial comm');
+  try {
+    serialPorts = await serialport.list();
+    console.log('Ports', serialPorts);
+    port = new serialport(serialPorts[0].path);
+    const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
+    parser.on('data', processData)
+  } catch (err) {
+    console.error('serialPortError', err);
+  }
+}
+
+const processRequest = (request: string) => {
+  switch (request) {
+    case 'SETPOINT':
+      port.write(`${setPoint}\n`, (err) => {
+        if (err) {
+          return console.log('Error on write: ', err.message)
+        }
+        console.log('message written')
+      });
+      break;
+  }
+}
+
+const processStatus = (status: string) => {
+  currentStatus = JSON.parse(status);
+}
+
+const processData = (data: string) => {
+  console.log(data);
+  if (data === 'HI TERRAMAN') {
+    console.log('Replying with HI TERRAMAN');
+    port.write('HI TERRAMAN\n', (err) => {
+      if (err) {
+        return console.log('Error on write: ', err.message)
+      }
+      console.log('message written')
+    });
+    return;
+  }
+
+  if (data.startsWith('REQ')) {
+    processRequest(data.split('=')[1].trim());
+    return;
+  }
+
+  if (data.startsWith('STATUS')) {
+    processStatus(data.split('=')[1].trim());
+    return;
+  }
+}
 
 function createWindow(): BrowserWindow {
 
@@ -30,9 +88,7 @@ function createWindow(): BrowserWindow {
   });
 
   if (serve) {
-
     win.webContents.openDevTools();
-
     require('electron-reload')(__dirname, {
       electron: require(`${__dirname}/node_modules/electron`)
     });
@@ -54,21 +110,17 @@ function createWindow(): BrowserWindow {
     win = null;
   });
 
-  ipcMain.on('getSerialPorts', async (event, args) => {
-    console.log('Received getSerialPorts');
-    try {
-      serialPorts = await serialport.list();
-      console.log('Ports', serialPorts);
-      event.reply('serialPortsReceived', serialPorts);
-
-      const port = new serialport(serialPorts[0].path);
-      port.on('readable', function () {
-        console.log('Data:', port.read())
-      });
-    } catch(err) {
-      event.reply('serialPortError', err);
-    }
+  ipcMain.on('changeSetPoint', (event, newSetPoint) => {
+    console.log('Received changeSetPoint', newSetPoint);
+    setPoint = newSetPoint;
   });
+
+  ipcMain.on('requestStatus', (event, _) => {
+    console.log('Received requestStatus');
+    event.reply('statusReceived', currentStatus);
+  });
+
+  startSerialComm();
 
   return win;
 }

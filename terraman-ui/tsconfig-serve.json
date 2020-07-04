@@ -17,8 +17,7 @@
     ]
   },
   "files": [
-    "main.ts",
-    "renderer.ts"
+    "main.ts"
   ],
   "exclude": [
     "node_modules",
