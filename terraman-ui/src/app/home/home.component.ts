@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { ClimateService } from '../core/services/climate/climate.service';
 import { Observable } from 'rxjs';
-import { IpcRenderer } from 'electron';
 import { ClimateStatus } from '../core/services/climate/climate-status';
 
 @Component({
