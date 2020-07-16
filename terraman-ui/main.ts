@@ -5,7 +5,9 @@ import * as url from 'url';
 const serialport = require('serialport');
 const Readline = require('@serialport/parser-readline');
 let port;
-let currentStatus;
+let currentStatus = {
+  log: []
+};
 let setPoint = 30;
 
 let win: BrowserWindow = null;
@@ -14,16 +16,30 @@ let serialPorts = [];
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
+const log = (text, data?) => {
+  console.log(text, data);
+  currentStatus = {
+    ...currentStatus,
+    log: [
+      ...currentStatus.log,
+      {
+        text,
+        data
+      }
+    ]
+  };
+}
+
 const startSerialComm = async () => {
   console.log('Create serial comm');
   try {
     serialPorts = await serialport.list();
-    console.log('Ports', serialPorts);
+    log('Ports', serialPorts);
     port = new serialport(serialPorts[0].path);
     const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
     parser.on('data', processData)
   } catch (err) {
-    console.error('serialPortError', err);
+    log('serialPortError', err);
   }
 }
 
@@ -32,27 +48,30 @@ const processRequest = (request: string) => {
     case 'SETPOINT':
       port.write(`${setPoint}\n`, (err) => {
         if (err) {
-          return console.log('Error on write: ', err.message)
+          return log('Error on write: ', err.message);
         }
-        console.log('message written')
+        log('message written');
       });
       break;
   }
 }
 
 const processStatus = (status: string) => {
-  currentStatus = JSON.parse(status);
+  currentStatus = {
+    ...currentStatus,
+    ...JSON.parse(status)
+  };
 }
 
 const processData = (data: string) => {
   console.log(data);
   if (data === 'HI TERRAMAN') {
-    console.log('Replying with HI TERRAMAN');
+    log('Replying with HI TERRAMAN');
     port.write('HI TERRAMAN\n', (err) => {
       if (err) {
-        return console.log('Error on write: ', err.message)
+        return log('Error on write: ', err.message)
       }
-      console.log('message written')
+      log('message written')
     });
     return;
   }
@@ -111,13 +130,17 @@ function createWindow(): BrowserWindow {
   });
 
   ipcMain.on('changeSetPoint', (event, newSetPoint) => {
-    console.log('Received changeSetPoint', newSetPoint);
+    log('Received changeSetPoint', newSetPoint);
     setPoint = newSetPoint;
   });
 
   ipcMain.on('requestStatus', (event, _) => {
-    console.log('Received requestStatus');
+    log('Received requestStatus');
     event.reply('statusReceived', currentStatus);
+  });
+
+  ipcMain.on('requestExit', (event, _) => {
+    app.exit();
   });
 
   startSerialComm();

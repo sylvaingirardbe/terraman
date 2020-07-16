@@ -16,7 +16,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void { 
-    this.status$ = this.climateService.getStatus();
+    this.status$ = this.climateService.getSensorStatus();
     this.setPoint$ = this.climateService.getSetpoint();
   }
 
@@ -26,5 +26,9 @@ export class HomeComponent implements OnInit {
 
   increaseTemp(amount: number) {
     this.climateService.increaseSetpoint(amount);
+  }
+
+  exit() {
+    this.climateService.exit();
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, interval, BehaviorSubject } from 'rxjs';
-import { map, filter, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { filter, tap, map } from 'rxjs/operators';
 import { IpcRenderer } from 'electron';
 import { ClimateStatus } from './climate-status';
 
@@ -25,7 +25,9 @@ export class ClimateService {
         }
 
         setInterval(() => this.ipc.send('requestStatus'), 1000);
-        this.ipc.on('statusReceived', (event, args) => this.status$.next(args));
+        this.ipc.on('statusReceived', (event, args) => 
+            this.status$.next(args)
+        );
     }
 
     increaseSetpoint(amount: number) {
@@ -42,7 +44,18 @@ export class ClimateService {
         );
     }
 
-    getStatus(): Observable<ClimateStatus> {
-        return this.status$.asObservable().pipe(filter(status => status !== null));
+    getSensorStatus(): Observable<ClimateStatus> {
+        return this.status$.asObservable().pipe(
+            filter(status => !!status && !!status.humidity && !!status.temp),
+            map(status => ({
+                humidity: status.humidity,
+                temp: status.temp,
+                heating: status.heating
+            } as ClimateStatus)), 
+        );
+    }
+
+    exit() {
+        this.ipc.send('requestExit');
     }
 }

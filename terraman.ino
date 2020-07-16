@@ -27,6 +27,8 @@ double lastError;
 double input, output;
 double cumError, rateError;
 
+double safeTemperature = 28;
+
 void setup() {
     Serial.begin(9600);
     while(!Serial);
@@ -54,7 +56,7 @@ void setup() {
     String received = ""; 
     //Wait for serial connection to controller
     while(received != "HI TERRAMAN\n") {
-        received = waitForReply();
+        received = waitForReply(0);
     }
 }
 
@@ -63,7 +65,12 @@ void loop() {
     Serial.println("REQ=SETPOINT");
     double setPoint = 0;
     while(setPoint <= 0) {
-        setPoint = waitForReply().toDouble();
+        String setPointReply = waitForReply(10000);
+        if(setPointReply == "") {
+            setPoint = safeTemperature;
+        } else {
+            setPoint = setPointReply.toDouble();
+        }
     }
 
     double temp = sht31.getTemperature();
@@ -86,7 +93,6 @@ void outputStatus(double temp, double humidity) {
     Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), HEATING_CHANNEL - 1)));
     Serial.print("}");
     Serial.println();
-
 }
 
 void actOnError(double error) {
@@ -119,13 +125,17 @@ double pid(double value, double setPoint){
     return out;
 }
 
-String waitForReply() {
-    String received;
-    while (Serial.available()) {
+String waitForReply(long timeout) {
+    String received = "";
+    long start, current = millis();
+    while (Serial.available() && current - start <= timeout) {
         delay(3);
-        if (Serial.available() >0) {
+        if (Serial.available() > 0) {
             char c = Serial.read();
             received += c;
+        }
+        if(timeout > 0) {
+            current = millis();
         }
     }
     return received;
