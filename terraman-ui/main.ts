@@ -31,7 +31,7 @@ const log = (text, data?) => {
 }
 
 const startSerialComm = async () => {
-  console.log('Create serial comm');
+  log('Create serial comm');
   try {
     serialPorts = await serialport.list();
     log('Ports', serialPorts);
@@ -50,7 +50,7 @@ const processRequest = (request: string) => {
         if (err) {
           return log('Error on write: ', err.message);
         }
-        log('message written');
+        log('SetPoint sent');
       });
       break;
   }
@@ -64,7 +64,7 @@ const processStatus = (status: string) => {
 }
 
 const processData = (data: string) => {
-  console.log(data);
+  log('Processing data', data);
   if (data === 'HI TERRAMAN') {
     log('Replying with HI TERRAMAN');
     port.write('HI TERRAMAN\n', (err) => {
