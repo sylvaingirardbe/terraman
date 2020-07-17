@@ -19,7 +19,6 @@
       "!tsconfig.json",
       "!tslint.json"
   ],
-  "npmRebuild": "true",
   "win": {
     "icon": "dist/assets/icons",
     "target": [
@@ -34,8 +33,8 @@
   },
   "linux": {
     "icon": "dist/assets/icons",
-    "target": {
-      "target": "AppImage"
-    }
+    "target": [
+      "AppImage"
+    ]
   }
 }
