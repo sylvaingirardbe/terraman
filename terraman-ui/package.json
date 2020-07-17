@@ -18,12 +18,6 @@
   ],
   "main": "main.js",
   "private": true,
-  "build": {
-    "appId": "terraman.ui",
-    "mac": {
-      "category": "Utility"
-    }
-  },
   "scripts": {
     "install": "electron-rebuild",
     "postinstall": "electron-builder install-app-deps",
