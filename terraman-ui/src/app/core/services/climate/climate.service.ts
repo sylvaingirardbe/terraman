@@ -14,6 +14,8 @@ export class ClimateService {
     private ipc: IpcRenderer;
 
     constructor() {
+        console.log('ClimateService instantiated...');
+
         if ((<any>window).require) {
             try {
                 this.ipc = (<any>window).require('electron').ipcRenderer;
@@ -25,9 +27,10 @@ export class ClimateService {
         }
 
         setInterval(() => this.ipc.send('requestStatus'), 1000);
-        this.ipc.on('statusReceived', (event, args) => 
-            this.status$.next(args)
-        );
+        this.ipc.on('statusReceived', (event, args) => {
+            console.log('Status received', args);
+            this.status$.next(args);
+        });
     }
 
     increaseSetpoint(amount: number) {
