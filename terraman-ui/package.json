@@ -21,7 +21,7 @@
   "build": {
     "appId": "terraman.ui",
     "mac": {
-      "category": "administration"
+      "category": "Utility"
     }
   },
   "scripts": {
@@ -42,9 +42,7 @@
     "test:watch": "ng test",
     "e2e": "npm run build:prod && cross-env TS_NODE_PROJECT='e2e/tsconfig.e2e.json' mocha --timeout 300000 --require ts-node/register e2e/**/*.e2e.ts",
     "version": "conventional-changelog -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
-    "lint": "ng lint",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "lint": "ng lint"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "9.1.0",
