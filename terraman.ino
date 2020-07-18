@@ -58,6 +58,9 @@ void setup() {
     while(received != "HI TERRAMAN\n") {
         received = waitForReply(0);
     }
+    Serial.println("Waiting to enter loop.");
+    delay(1000);
+    Serial.println("Entering loop...");
 }
 
 void loop() {
@@ -77,7 +80,6 @@ void loop() {
     double hum = sht31.getHumidity();
 
     double error = pid(temp, setPoint);
-    Serial.println("Error: " + String(error));
 
     actOnError(error);
 
@@ -128,14 +130,18 @@ double pid(double value, double setPoint){
 String waitForReply(long timeout) {
     String received = "";
     long start, current = millis();
-    while (Serial.available() && current - start <= timeout) {
+    while(!Serial.available() && current - start <= timeout) {
+        if(timeout > 0) {
+            current = millis();
+        }
+        delay(3);
+    }
+
+    while (Serial.available()) {
         delay(3);
         if (Serial.available() > 0) {
             char c = Serial.read();
             received += c;
-        }
-        if(timeout > 0) {
-            current = millis();
         }
     }
     return received;
