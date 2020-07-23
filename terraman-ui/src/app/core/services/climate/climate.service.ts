@@ -3,6 +3,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { filter, tap, map } from 'rxjs/operators';
 import { IpcRenderer } from 'electron';
 import { ClimateStatus } from './climate-status';
+import { LoggerService } from '../logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -13,8 +14,8 @@ export class ClimateService {
 
     private ipc: IpcRenderer;
 
-    constructor() {
-        console.log('ClimateService instantiated...');
+    constructor(private readonly logger: LoggerService) {
+        logger.log('ClimateService instantiated...');
 
         if ((<any>window).require) {
             try {
@@ -28,7 +29,7 @@ export class ClimateService {
 
         setInterval(() => this.ipc.send('requestStatus'), 1000);
         this.ipc.on('statusReceived', (event, args) => {
-            console.log('Status received', args);
+            logger.log('Status received', args);
             this.status$.next(args);
         });
     }

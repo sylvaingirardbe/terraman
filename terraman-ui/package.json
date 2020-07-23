@@ -96,10 +96,20 @@
     "node": ">=10.13.0"
   },
   "dependencies": {
+    "@angular/animations": "10.0.4",
     "@angular/localize": "9.1.12",
+    "@fortawesome/angular-fontawesome": "0.7.0",
+    "@fortawesome/fontawesome-common-types": "0.2.30",
+    "@fortawesome/fontawesome-svg-core": "1.2.30",
+    "@fortawesome/free-brands-svg-icons": "^5.13.0",
+    "@fortawesome/free-regular-svg-icons": "^5.13.0",
+    "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@ng-bootstrap/ng-bootstrap": "6.1.0",
+    "angular-calendar": "0.28.16",
     "angular-gauge": "3.1.2",
     "bootstrap-icons": "1.0.0-alpha5",
+    "date-fns": "2.15.0",
+    "moment": "2.27.0",
     "serialport": "9.0.0"
   }
 }

@@ -1,13 +1,18 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
-import { HomeComponent } from './home/home.component';
+import { ClimateComponent } from './climate/climate.component';
+import { ScheduleComponent } from './schedule/schedule.component';
 
 const routes: Routes = [
   {
-    path: 'home',
-    component: HomeComponent
-  }
+    path: 'climate',
+    component: ClimateComponent
+  },
+  {
+    path: 'schedule',
+    component: ScheduleComponent
+  },
 ];
 
 @NgModule({

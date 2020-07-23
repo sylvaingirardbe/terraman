@@ -1,0 +1,7 @@
+<terraman-climate 
+    *ngIf="status$ | async as status"
+    [status]="status" 
+    [setPoint]="setPoint$ | async"
+    (increaseTemp)="increaseTemp($event)"
+    (decreaseTemp)="decreaseTemp($event)"
+></terraman-climate>

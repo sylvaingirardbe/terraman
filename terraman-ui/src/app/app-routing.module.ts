@@ -7,7 +7,7 @@ import { HomeRoutingModule } from './home/home-routing.module';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'climate',
     pathMatch: 'full'
   },
   {
