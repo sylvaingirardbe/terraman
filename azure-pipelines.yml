@@ -5,13 +5,27 @@
 
 trigger:
 - master
-
-pool:
-  name: 'ARM'
-
-steps:
-- script: |
-    cd terraman-ui
-    npm install
-    npm run electron:build
-  displayName: 'npm install and build'
+  
+jobs:
+- job: BuildAngular
+  displayName: Build Angular
+  pool:
+    name: 'Default'
+  steps:
+  - script: |
+      cd terraman-ui
+      npm install
+      npm run build:prod
+    displayName: 'npm install and build'
+  - publish: $(System.DefaultWorkingDirectory)/terraman-ui
+    artifact: angular
+- job: BuildElectron
+  pool:
+    name: 'ARM'
+  steps:
+  - download: current
+    artifact: angular
+  - script: |
+      cd angular
+      npm install
+      electron-builder build --armv7l
