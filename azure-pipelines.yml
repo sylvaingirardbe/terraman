@@ -20,6 +20,8 @@ jobs:
   - publish: $(System.DefaultWorkingDirectory)/terraman-ui
     artifact: angular
 - job: BuildElectron
+  displayName: Build Electron
+  dependsOn: BuildAngular
   pool:
     name: 'ARM'
   steps:
