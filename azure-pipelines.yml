@@ -32,6 +32,6 @@ jobs:
   - download: current
     artifact: angular
   - script: |
-      cd angular
+      cd ../angular
       npm install
       electron-builder build --armv7l
