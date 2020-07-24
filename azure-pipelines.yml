@@ -18,7 +18,6 @@ jobs:
     displayName: 'npm install'
     continueOnError: true
   - script:
-      cd terraman-ui
       npm run build:prod
     displayName: 'npm run build'
   - publish: $(System.DefaultWorkingDirectory)/terraman-ui
