@@ -34,4 +34,8 @@ jobs:
   - script: |
       cd ../angular
       npm install
-      electron-builder build --armv7l
+    displayName: 'npm install'
+  - script: |
+      cd ../angular
+      npx electron-builder build --armv7l
+    displayName: 'electron build'
