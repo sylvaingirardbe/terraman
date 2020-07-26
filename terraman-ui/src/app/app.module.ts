@@ -18,6 +18,7 @@ import { ClimateService } from './core/services/climate/climate.service';
 import { registerLocaleData } from '@angular/common';
 import localeNlBe from '@angular/common/locales/nl-BE';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
@@ -43,7 +44,8 @@ registerLocaleData(localeNlBe, 'nl-BE');
         deps: [HttpClient]
       }
     }),
-    FontAwesomeModule
+    FontAwesomeModule,
+    NgbDropdownModule
   ],
   providers: [
     ClimateService,

@@ -17,3 +17,7 @@ The software is developed and tested on:
 - 7" touchscreen for Raspberry Pi
 
 The multiplexer is only required if you intend to attach more than 2 temperature & humidity sensors since they only have 2 user selectable I2C addresses.
+
+# Build
+
+Building with the serialport dependency on X86 for ARM seems not to be working very well. Building on ARM with a certain combination of dependencies (mostly @fortawesome stuff) resulted in javascript heap memory issues. For this reason the pipeline is split up to build Angular on X86 first and package it with electron-build on ARM.

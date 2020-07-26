@@ -1,3 +1,15 @@
 .mt-45 {
-    margin-top: 2rem !important;
-  }
+  margin-top: 2rem !important;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.dropdown-menu {
+  min-width: unset;
+}
+
+.dropdown-item {
+  font-size: xx-large;
+}

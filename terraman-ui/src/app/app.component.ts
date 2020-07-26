@@ -6,7 +6,8 @@ import { ClimateService } from './core/services/climate/climate.service';
 import { 
   faPowerOff,
   faHome,
-  faCogs
+  faCogs,
+  faBars
 } from '@fortawesome/free-solid-svg-icons';
 import { Router } from '@angular/router';
 
@@ -19,6 +20,7 @@ export class AppComponent {
   faPowerOff = faPowerOff;
   faHome = faHome;
   faCogs = faCogs;
+  faBars = faBars;
 
   constructor(
     private electronService: ElectronService,

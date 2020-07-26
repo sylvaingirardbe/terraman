@@ -1,19 +1,22 @@
 <div class="container-fluid">
     <div class="row">
-      <div class="col-1 offset-8 mt-4 mr-2">
-        <a (click)="climate()">
-          <fa-icon [icon]="faHome" size="3x"></fa-icon>
-        </a>
-      </div>
-      <div class="col-1 mt-4 mr-2">
-        <a (click)="schedule()">
-          <fa-icon [icon]="faCogs" size="3x"></fa-icon>
-        </a>
-      </div>
-      <div class="col-1 mt-4">
-        <a (click)="exit()">
-          <fa-icon [icon]="faPowerOff" size="3x"></fa-icon>
-        </a>
+      <div class="col text-right mt-4 mr-4">
+        <div ngbDropdown placement="bottom-right" class="d-inline-block">
+          <button class="btn btn-outline-primary" ngbDropdownToggle>
+            <fa-icon [icon]="faBars" size="3x"></fa-icon>
+          </button>
+          <div ngbDropdownMenu aria-labelledby="dropdownBasic2">
+            <button (click)="climate()" ngbDropdownItem>
+              <fa-icon [icon]="faHome" size="lg" [fixedWidth]="true"></fa-icon> Dashboard
+            </button>
+            <button (click)="schedule()" ngbDropdownItem>
+              <fa-icon [icon]="faCogs" size="lg" [fixedWidth]="true"></fa-icon> Schedule
+            </button>
+            <button (click)="exit()" ngbDropdownItem>
+              <fa-icon [icon]="faPowerOff" size="lg" [fixedWidth]="true"></fa-icon> Exit
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     <router-outlet></router-outlet>
