@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "SHT31.h"
+#include <Adafruit_AM2315.h>
 #include <multi_channel_relay.h>
 
 #define SENSOR 0x44
@@ -11,6 +12,7 @@
 #define MIST_CHANNEL 0x04
  
 Multi_Channel_Relay relay;
+Adafruit_AM2315 am2315;
 
 SHT31 sht31 = SHT31();
 
@@ -18,7 +20,7 @@ double kp = 1;
 double ki = 0;
 double kd = 0;
 
-double samplePeriod = 1000;
+double samplePeriod = 2000;
  
 unsigned long currentTime, previousTime;
 double elapsedTime;
@@ -27,20 +29,17 @@ double lastError;
 double input, output;
 double cumError, rateError;
 
+boolean sht31Found, am2315Found;
+
 double safeTemperature = 28;
 
 void setup() {
     Serial.begin(9600);
     while(!Serial);
     Serial.println("begin...");  
-    sht31.begin();
-
-    // uint8_t old_address = relay.scanI2CDevice();
-    // if((0x00 == old_address) || (0xff == old_address)) {
-    //     while(1);
-    // }
-
-    // Serial.println("Old address: " + String(old_address));
+    
+    sht31Found = sht31.begin();
+    am2315Found = am2315.begin();
 
     Serial.println("Start write address");
     relay.changeI2CAddress(0x11, 0x11);  /* Set I2C address and save to Flash */  
@@ -76,20 +75,27 @@ void loop() {
         }
     }
 
-    double temp = sht31.getTemperature();
-    double hum = sht31.getHumidity();
+    float temperature, humidity = 0;
+    if(am2315Found) {
+        am2315.readTemperatureAndHumidity(&temperature, &humidity);
+    }
 
-    double error = pid(temp, setPoint);
+    double temp, hum = 0;
+    if(sht31Found) {
+        temp = sht31.getTemperature();
+        hum = sht31.getHumidity();
+        double error = pid(temp, setPoint);
+        actOnError(error);
+        outputStatus(temp, hum);
+    }
 
-    actOnError(error);
-
-    outputStatus(temp, hum);
     delay(samplePeriod);
 }
 
-void outputStatus(double temp, double humidity) {
+void outputStatus(char sensorName, double temp, double humidity) {
     //Send sensor info
     Serial.print("STATUS={");
+    Serial.print("\"name\": " + sensorName + ","); 
     Serial.print("\"temp\": " + String(temp) + ","); 
     Serial.print("\"humidity\": " + String(humidity) + ",");
     Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), HEATING_CHANNEL - 1)));
