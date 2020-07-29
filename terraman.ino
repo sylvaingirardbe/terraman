@@ -19,6 +19,7 @@
 #define SENSORS 0x03
 
 Multi_Channel_Relay relay;
+Adafruit_AM2315 am2315;
 
 // SHT31 sht31_0 = SHT31();
 // SHT31 sht31_1 = SHT31();
@@ -32,6 +33,8 @@ double samplePeriod = 2000;
  
 unsigned long currentMistingTime, previousMistingTime, mistingDuration;
 double input, output;
+
+boolean sht31Found, am2315Found;
 
 double safeTemperature = 28;
 double safeHumidity = 60;
@@ -142,6 +145,7 @@ void handleSensor(int index, SetPoints setPoints, int channels[]) {
 void outputStatus(int sensor, double temp, double humidity, int heatingChannel, int mistingChannel) {
     //Send sensor info
     Serial.print("STATUS={");
+    Serial.print("\"name\": " + sensorName + ","); 
     Serial.print("\"temp\": " + String(temp) + ","); 
     Serial.print("\"humidity\": " + String(humidity) + ",");
     Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), heatingChannel - 1)));
