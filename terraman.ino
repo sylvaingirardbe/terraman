@@ -1,24 +1,32 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "SHT31.h"
+// #include "SHT31.h"
+#include <Adafruit_AM2315.h>
 #include <multi_channel_relay.h>
 
+#define TCAADDR 0x70
 #define SENSOR 0x44
 #define USE_8_CHANNELS (1)
 #define LIGHT_CHANNEL 0x01
 #define HEATING_CHANNEL 0x02
 #define VENT_CHANNEL 0x03
 #define MIST_CHANNEL 0x04
- 
+#define SENSORS 0x03
+
 Multi_Channel_Relay relay;
 
-SHT31 sht31 = SHT31();
+// SHT31 sht31_0 = SHT31();
+// SHT31 sht31_1 = SHT31();
+// SHT31 sht31_2 = SHT31();
+
+Adafruit_AM2315 sensors[SENSORS];
+double setPoints[SENSORS][2];
 
 double kp = 1;
 double ki = 0;
 double kd = 0;
 
-double samplePeriod = 1000;
+double samplePeriod = 2000;
  
 unsigned long currentTime, previousTime;
 double elapsedTime;
@@ -29,18 +37,22 @@ double cumError, rateError;
 
 double safeTemperature = 28;
 
+void tcaselect(uint8_t i) {
+  if (i > 7) return;
+ 
+  Wire.beginTransmission(TCAADDR);
+  Wire.write(1 << i);
+  Wire.endTransmission();  
+}
+
 void setup() {
     Serial.begin(9600);
     while(!Serial);
-    Serial.println("begin...");  
-    sht31.begin();
-
-    // uint8_t old_address = relay.scanI2CDevice();
-    // if((0x00 == old_address) || (0xff == old_address)) {
-    //     while(1);
-    // }
-
-    // Serial.println("Old address: " + String(old_address));
+    Serial.println("begin...");
+    for(int i = 0; i < SENSORS; i++) {
+        tcaselect(i);
+        sensors[i].begin();
+    }
 
     Serial.println("Start write address");
     relay.changeI2CAddress(0x11, 0x11);  /* Set I2C address and save to Flash */  
@@ -76,15 +88,22 @@ void loop() {
         }
     }
 
-    double temp = sht31.getTemperature();
-    double hum = sht31.getHumidity();
+    for(int i = 0; i < SENSORS; i++) {
+        handleSensor(i);
+    }
 
-    double error = pid(temp, setPoint);
-
-    actOnError(error);
-
-    outputStatus(temp, hum);
     delay(samplePeriod);
+}
+
+void handleSensor(int index) {
+    float temp, hum;
+    tcaselect(index);
+    sensors[index].readTemperatureAndHumidity(&temp, &hum);
+    double tempError = pid(temp, setPoints[index][0]);
+    actOnError(tempError);
+    double humError = pid(hum, setPoints[index][1]);
+    actOnError(humError);
+    outputStatus(temp, hum);
 }
 
 void outputStatus(double temp, double humidity) {
