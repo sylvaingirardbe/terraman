@@ -3,14 +3,19 @@
 // #include "SHT31.h"
 #include <Adafruit_AM2315.h>
 #include <multi_channel_relay.h>
+#include "setpoints.h"
+#include "PidController.h"
 
 #define TCAADDR 0x70
 #define SENSOR 0x44
-#define USE_8_CHANNELS (1)
 #define LIGHT_CHANNEL 0x01
-#define HEATING_CHANNEL 0x02
-#define VENT_CHANNEL 0x03
-#define MIST_CHANNEL 0x04
+#define HEATING_CHANNEL_1 2
+#define HEATING_CHANNEL_2 0x03
+#define HEATING_CHANNEL_3 0x04
+#define VENT_CHANNEL 0x08
+#define MISTING_CHANNEL_1 0x05
+#define MISTING_CHANNEL_2 0x06
+#define MISTING_CHANNEL_3 0x07
 #define SENSORS 0x03
 
 Multi_Channel_Relay relay;
@@ -22,20 +27,16 @@ Multi_Channel_Relay relay;
 Adafruit_AM2315 sensors[SENSORS];
 double setPoints[SENSORS][2];
 
-double kp = 1;
-double ki = 0;
-double kd = 0;
 
 double samplePeriod = 2000;
  
-unsigned long currentTime, previousTime;
-double elapsedTime;
-double error;
-double lastError;
+unsigned long currentMistingTime, previousMistingTime, mistingDuration;
 double input, output;
-double cumError, rateError;
 
 double safeTemperature = 28;
+double safeHumidity = 60;
+
+PidController pidControllers[3];
 
 void tcaselect(uint8_t i) {
   if (i > 7) return;
@@ -76,75 +77,93 @@ void setup() {
 }
 
 void loop() {
-    //Read setpoint
-    Serial.println("REQ=SETPOINT");
-    double setPoint = 0;
-    while(setPoint <= 0) {
-        String setPointReply = waitForReply(10000);
-        if(setPointReply == "") {
-            setPoint = safeTemperature;
-        } else {
-            setPoint = setPointReply.toDouble();
-        }
-    }
-
-    for(int i = 0; i < SENSORS; i++) {
-        handleSensor(i);
-    }
-
+    SetPoints setPoints = getSetpoints(0);
+    int channels1[2] = {HEATING_CHANNEL_1, MISTING_CHANNEL_1};
+    handleSensor(
+        0,
+        setPoints,
+        channels1
+    );
+    setPoints = getSetpoints(1);
+    int channels2[2] = {HEATING_CHANNEL_2, MISTING_CHANNEL_2};
+    handleSensor(
+        1,
+        setPoints, 
+        channels2
+    );
+    setPoints = getSetpoints(2);
+    int channels3[2] = {HEATING_CHANNEL_3, MISTING_CHANNEL_3};
+    handleSensor(
+        2, 
+        setPoints,
+        channels3
+    );
+    uint8_t ventingRequired = getVentingRequirement();
+    handleVenting(ventingRequired);
     delay(samplePeriod);
 }
 
-void handleSensor(int index) {
+uint8_t getVentingRequirement() {
+
+}
+
+void handleVenting(uint8_t ventingRequired) {
+
+}
+
+SetPoints getSetpoints(int index) {
+    Serial.println("REQ=SETPOINTS_" + index);
+    String setPointReply = waitForReply(10000);
+    char setPointReplyChars[setPointReply.length()] = setPointReply;
+    struct SetPoints setPoints;
+    if(setPointReply == "") {
+        setPoints.temperature = safeTemperature;
+        setPoints.humidity = safeHumidity;
+    } else {
+        char *token = strtok(setPointReplyChars, ";");
+        setPoints.temperature = strtod(token, NULL);
+        token = strtok(NULL, ";");
+        setPoints.humidity = strtod(token, NULL);
+    }
+    return setPoints;
+}
+
+void handleSensor(int index, SetPoints setPoints, int channels[]) {
     float temp, hum;
     tcaselect(index);
     sensors[index].readTemperatureAndHumidity(&temp, &hum);
-    double tempError = pid(temp, setPoints[index][0]);
-    actOnError(tempError);
-    double humError = pid(hum, setPoints[index][1]);
-    actOnError(humError);
-    outputStatus(temp, hum);
+    double tempError = pidControllers[index](temp, setPoints.temperature);
+    heat(tempError, channels[0]);
+    //double humError = pidControllers[index](hum, setPoints.humidity);
+    //mist(humError, channels[1]);
+    outputStatus(index, temp, hum, channels[0], channels[1]);
 }
 
-void outputStatus(double temp, double humidity) {
+void outputStatus(int sensor, double temp, double humidity, int heatingChannel, int mistingChannel) {
     //Send sensor info
     Serial.print("STATUS={");
     Serial.print("\"temp\": " + String(temp) + ","); 
     Serial.print("\"humidity\": " + String(humidity) + ",");
-    Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), HEATING_CHANNEL - 1)));
+    Serial.print("\"heating\": " + String(bitRead(relay.getChannelState(), heatingChannel - 1)));
+    Serial.print("\"misting\": " + String(bitRead(relay.getChannelState(), mistingChannel - 1)));
     Serial.print("}");
     Serial.println();
 }
 
-void actOnError(double error) {
+void heat(double error, int channel) {
     if(error > 0) {
-        Serial.println("Turning heating on");
-        relay.turn_on_channel(HEATING_CHANNEL);
+        Serial.println("Turning channel on");
+        relay.turn_on_channel(channel);
     } else {
-        Serial.println("Turning heating off");
-        relay.turn_off_channel(HEATING_CHANNEL);
+        Serial.println("Turning channel off");
+        relay.turn_off_channel(channel);
     }
 }
 
-double p(double value, double setPoint) {
-    error = value - setPoint;
+void mist(double error, int channel) {
+
 }
 
-double pid(double value, double setPoint){    
-    currentTime = millis();
-    elapsedTime = (double)(currentTime - previousTime);
-    
-    error = setPoint - value;
-    cumError += error * elapsedTime;
-    rateError = (error - lastError)/elapsedTime;
-
-    double out = kp*error + ki*cumError + kd*rateError;
-
-    lastError = error;
-    previousTime = currentTime;
-
-    return out;
-}
 
 String waitForReply(long timeout) {
     String received = "";
