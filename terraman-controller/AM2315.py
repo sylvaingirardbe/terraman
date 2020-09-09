@@ -20,7 +20,7 @@ AM2315_I2CADDR = 0x5C
 AM2315_READREG = 0x03
 MAXREADATTEMPT = 10
 
-AM2315DEBUG = False
+AM2315DEBUG = True
 
 
 class AM2315:
@@ -117,13 +117,17 @@ class AM2315:
         while count <= MAXREADATTEMPT:
             try:
                 try:
-                    self._i2c.write(bytes([0x00]))
+                    if (AM2315DEBUG == True):
+                        print("Try to wake up")
+                    self._i2c.write(bytes([0x00 & 0xFF]))
                     time.sleep(0.050)
                 except:
                     if (AM2315DEBUG == True):
                         print("Wake Byte Fail")
-                    time.sleep(2.000)
-                    self._i2c.write(bytes([0x00]))
+                    time.sleep(1.000)
+                    if (AM2315DEBUG == True):
+                        print("Trying to wake after fail")
+                    self._i2c.write(bytes([0x00 & 0xFF]))
                     time.sleep(0.051)
 
                 # TELL THE DEVICE WE WANT 4 BYTES OF DATA

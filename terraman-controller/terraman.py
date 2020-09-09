@@ -1,27 +1,45 @@
 #!/usr/bin/env python3
 
-# This example shows using two TSL2491 light sensors attached to TCA9548A channels 0 and 1.
-# Use with other I2C sensors would be similar.
 import time
-import board
-import busio
-import adafruit_am2320
-import adafruit_tca9548a
+# import board
+# import busio
+# import adafruit_sht31d
+# import adafruit_tca9548a
+import socketio
 
-# Create I2C bus as normal
-i2c = busio.I2C(board.SCL, board.SDA)
+# i2c = busio.I2C(board.SCL, board.SDA)
+# tca = adafruit_tca9548a.TCA9548A(i2c)
+# sensor1 = adafruit_sht31d.SHT31D(tca[0], 0x45)
+# sensor2 = adafruit_sht31d.SHT31D(tca[1], 0x45)
+# sensor3 = adafruit_sht31d.SHT31D(tca[2], 0x45)
+# sensor4 = adafruit_sht31d.SHT31D(tca[3], 0x45)
 
-# Create the TCA9548A object and give it the I2C bus
-tca = adafruit_tca9548a.TCA9548A(i2c)
+sio = socketio.Client()
 
-# For each sensor, create it using the TCA9548A channel instead of the I2C object
-am1 = adafruit_am2320.AM2320(tca[0])
-am2 = adafruit_am2320.AM2320(tca[1])
-am3 = adafruit_am2320.AM2320(tca[2])
+@sio.event
+def connect():
+    print('connection established')
+    sio.emit('my other event', {'bleh': 'bleh'})
 
-# Loop and profit!
-while True:
-    print(am1.temperature, am1.relative_humidity)
-    print(am2.temperature, am2.relative_humidity)
-    print(am3.temperature, am3.relative_humidity)
-    time.sleep(2)
+def message(data):
+    print('I received a message!')
+
+@sio.on('my message')
+def my_message(data):
+    print('message received with ', data)
+    sio.emit('my response', {'response': 'my response'})
+
+@sio.event
+def disconnect():
+    print('disconnected from server')
+
+sio.connect('http://localhost:3000')
+
+# while True:
+#     print(sensor1.temperature, sensor1.relative_humidity)
+#     print(sensor2.temperature, sensor2.relative_humidity)
+#     print(sensor3.temperature, sensor3.relative_humidity)
+#     print(sensor4.temperature, sensor4.relative_humidity)
+#     time.sleep(1)
+
+sio.wait()

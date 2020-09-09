@@ -2,6 +2,21 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 
+const server = () => {}
+const http = require('http').createServer(server);
+const io = require('socket.io')(http);
+
+http.listen(3000);
+
+io.on('connection', (socket) => {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', (data) => {
+    console.log(data);
+  });
+
+  socket.on('status', );
+});
+
 const serialport = require('serialport');
 const Readline = require('@serialport/parser-readline');
 let port;
