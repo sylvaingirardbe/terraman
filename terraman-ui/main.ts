@@ -8,98 +8,49 @@ const io = require('socket.io')(http);
 
 http.listen(3000);
 
+let setPoint = 28;
+
 io.on('connection', (socket) => {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', (data) => {
-    console.log(data);
+  socket.on('status', (data) => {
+    currentStatus = {
+      ...data
+    };
   });
 
-  socket.on('status', );
+  socket.on('request setpoint', (data) => {
+    socket.emit('setpoint', {
+      sensor: 1,
+      temperature: setPoint,
+      humidity: 80
+    });
+  });
 });
 
-const serialport = require('serialport');
-const Readline = require('@serialport/parser-readline');
-let port;
+let logEntries = [];
+
 let currentStatus = {
-  log: []
+  sensor1: {
+    temp: null,
+    humidity: null,
+    heating: false,
+    misting: false
+  }
 };
-let setPoint = 30;
 
 let win: BrowserWindow = null;
-let serialPorts = [];
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
 const log = (text, data?) => {
   console.log(text, data);
-  currentStatus = {
-    ...currentStatus,
-    log: [
-      ...currentStatus.log,
-      {
-        text,
-        data
-      }
-    ]
-  };
-}
-
-const startSerialComm = async () => {
-  log('Create serial comm');
-  try {
-    serialPorts = await serialport.list();
-    log('Ports', serialPorts);
-    port = new serialport(serialPorts[0].path);
-    const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
-    parser.on('data', processData)
-  } catch (err) {
-    log('serialPortError', err);
-  }
-}
-
-const processRequest = (request: string) => {
-  switch (request) {
-    case 'SETPOINT':
-      port.write(`${setPoint}\n`, (err) => {
-        if (err) {
-          return log('Error on write: ', err.message);
-        }
-        log('SetPoint sent');
-      });
-      break;
-  }
-}
-
-const processStatus = (status: string) => {
-  currentStatus = {
-    ...currentStatus,
-    ...JSON.parse(status)
-  };
-}
-
-const processData = (data: string) => {
-  log('Processing data', data);
-  if (data === 'HI TERRAMAN') {
-    log('Replying with HI TERRAMAN');
-    port.write('HI TERRAMAN\n', (err) => {
-      if (err) {
-        return log('Error on write: ', err.message)
-      }
-      log('message written')
-    });
-    return;
-  }
-
-  if (data.startsWith('REQ')) {
-    processRequest(data.split('=')[1].trim());
-    return;
-  }
-
-  if (data.startsWith('STATUS')) {
-    processStatus(data.split('=')[1].trim());
-    return;
-  }
+  logEntries = [
+    ...logEntries,
+    {
+      text,
+      data
+    }
+  ];
 }
 
 function createWindow(): BrowserWindow {
@@ -157,8 +108,6 @@ function createWindow(): BrowserWindow {
   ipcMain.on('requestExit', (event, _) => {
     app.exit();
   });
-
-  startSerialComm();
 
   return win;
 }
