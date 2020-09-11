@@ -43,7 +43,16 @@ def main():
     sio.connect('http://localhost:3000')
 
     while True:
-        sio.emit('status', json.dumps(terraController.getChannelState(1).__dict__))
+        terraController.updateChannel(0, 28, 59)
+        terraController.updateChannel(1, 29, 69)
+        terraController.updateChannel(2, 27, 79)
+        terraController.updateChannel(3, 26, 89)
+        terraController.actOnStatus()
+        
+        for i in range(0, 4):
+            jsonOutput = json.dumps(terraController.getChannelState(i).__dict__)
+            print(i, jsonOutput)
+            sio.emit('status', jsonOutput)
         time.sleep(1)
 
 if __name__ == "__main__":
