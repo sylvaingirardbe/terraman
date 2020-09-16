@@ -23,7 +23,7 @@ class Relay:
         self._i2c.write(bytes([CMD_READ_FIRMWARE_VER]))
         result = bytearray(1)
         self._i2c.readinto(result)
-        return int.from_bytes(result)
+        return result
 
     def changeI2CAddress(self, new_addr, old_addr):
         self._i2c.write(bytes([CMD_SAVE_I2C_ADDR]))
