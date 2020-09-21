@@ -2,34 +2,16 @@
 
 import json
 import time
-import board
-import busio
-import adafruit_sht31d
-import adafruit_tca9548a
 import socketio
 import controller
-import relay
-i2c = busio.I2C(board.SCL, board.SDA)
-tca = adafruit_tca9548a.TCA9548A(i2c)
-sensor1 = adafruit_sht31d.SHT31D(tca[0], 0x44)
-sensor2 = adafruit_sht31d.SHT31D(tca[1], 0x44)
-# sensor3 = adafruit_sht31d.SHT31D(tca[2], 0x44)
-# sensor4 = adafruit_sht31d.SHT31D(tca[3], 0x44)
 
 def main():
     sio = socketio.Client()
     terraController = controller.Controller()
-    relayController = relay.Relay(i2c)
-
-    bindings = [
-        { "1_heating", 1 },
-        { "1_misting", 2 },
-        { "2_heating", 3 }
-    ]
 
     @sio.event
     def connect():
-        print('connection established')
+        print('Connection established')
         sio.emit('my other event', {'bleh': 'bleh'})
 
     def message(data):
@@ -37,7 +19,16 @@ def main():
 
     @sio.on('setpoints')
     def setpoints(data):
-        terraController.updateChannel(json.load(data))
+        index, humidity, temperature = json.load(data)
+        terraController.updateSetpoints(index, humidity, temperature)
+
+    @sio.on('enable lighting')
+    def enableLighting():
+        terraController.enableLighting()
+
+    @sio.on('disable lighting')
+    def disableLighting():
+        terraController.disableLighting()
 
     @sio.on('my message')
     def my_message(data):
@@ -54,20 +45,11 @@ def main():
         print('Unable to open socket')
 
     while True:
-        terraController.updateChannel(0, sensor1.temperature, sensor1.relative_humidity)
-        terraController.updateChannel(1, sensor2.temperature, sensor2.relative_humidity)
-        # terraController.updateChannel(2, sensor3.temperature, sensor3.humidity)
-        # terraController.updateChannel(3, sensor4.temperature, sensor4.humidity)
-        terraController.actOnStatus()
-
-        for i in range(0, 4):
-            jsonOutput = json.dumps(terraController.getChannelState(i).__dict__)
-            print(i, jsonOutput)
-            sio.emit('status', jsonOutput)
-        print(terraController.channels)
-        for i in range(0, 4):
-            if '{}_heating'.format(i) in bindings:
-                relayController.turnOnChannel(bindings['{}_heating'.format(i)]) if terraController.channels[i].heating else relayController.turnOffChannel(bindings['{}_heating'.format(i)])
+        terraController.readSensors()
+        terraController.actOnSensors()
+        jsonOutput = json.dumps(terraController.getChannelStates())
+        print(jsonOutput)
+        sio.emit('status', jsonOutput)
         time.sleep(1)
 
 if __name__ == "__main__":
