@@ -50,11 +50,11 @@ export class ClimateService {
 
     getSensorStatus(): Observable<ClimateStatus> {
         return this.status$.asObservable().pipe(
-            filter(status => !!status && !!status.humidity && !!status.temp),
+            filter(status => !!status && !!status[0][3] && !!status[0][0]),
             map(status => ({
-                humidity: status.humidity,
-                temp: status.temp,
-                heating: status.heating
+                humidity: status[0][3],
+                temp: status[0][0],
+                heating: status[0][2]
             } as ClimateStatus)), 
         );
     }

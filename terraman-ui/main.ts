@@ -8,21 +8,30 @@ const io = require('socket.io')(http);
 
 http.listen(3000);
 
-let setPoint = 28;
+let setPoints = [
+  {
+    index: 0,
+    temperature: 28,
+    humidity: 70
+  },
+  {
+    index: 1,
+    temperature: 24,
+    humidity: null
+  },
+];
 
 io.on('connection', (socket) => {
   socket.on('status', (data) => {
     currentStatus = {
-      ...data
+      ...JSON.parse(data)
     };
   });
 
-  socket.on('request setpoint', (data) => {
-    socket.emit('setpoint', {
-      sensor: 1,
-      temperature: setPoint,
-      humidity: 80
-    });
+  socket.on('request setpoints', (data) => {
+    if(setPoints[data]) {
+      socket.emit('setpoints', setPoints[data]);
+    }
   });
 });
 
@@ -96,12 +105,10 @@ function createWindow(): BrowserWindow {
   });
 
   ipcMain.on('changeSetPoint', (event, newSetPoint) => {
-    log('Received changeSetPoint', newSetPoint);
-    setPoint = newSetPoint;
+    setPoints[0] = newSetPoint;
   });
 
   ipcMain.on('requestStatus', (event, _) => {
-    log('Received requestStatus');
     event.reply('statusReceived', currentStatus);
   });
 

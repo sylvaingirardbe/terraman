@@ -15,12 +15,20 @@ class Channel:
         self.pid.setSampleTime(1)
         self.pid.SetPoint = temperatureSetpoint
     
+    def updateHumiditySetpoint(self, humiditySetpoint):
+        if not humiditySetpoint == None and not self.humiditySetpoint == humiditySetpoint: 
+            self.humiditySetpoint = humiditySetpoint
+           
+    def updateTemperatureSetpoint(self, temperatureSetpoint):
+        if not temperatureSetpoint == None and not self.temperatureSetpoint == temperatureSetpoint: 
+            self.temperatureSetpoint = temperatureSetpoint
+            self.pid.SetPoint = temperatureSetpoint
+            self.pid.update(self.temperature)
+
     def updateSetpoints(self, temperatureSetpoint, humiditySetpoint):
-        self.humiditySetpoint = humiditySetpoint
-        self.temperatureSetpoint = temperatureSetpoint
-        self.pid.SetPoint = temperatureSetpoint
-        self.pid.update(self.temperature)
-        self.__actOnError()
+            self.updateHumiditySetpoint(humiditySetpoint)
+            self.updateTemperatureSetpoint(temperatureSetpoint)
+            self.__actOnError()
 
     def updateMeasurements(self, temperature, humidity):
         self.humidity = humidity

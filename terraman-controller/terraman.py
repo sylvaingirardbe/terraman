@@ -19,8 +19,7 @@ def main():
 
     @sio.on('setpoints')
     def setpoints(data):
-        index, humidity, temperature = json.load(data)
-        terraController.updateSetpoints(index, humidity, temperature)
+        terraController.updateSetpoints(data['index'], data['humidity'], data['temperature'])
 
     @sio.on('enable lighting')
     def enableLighting():
@@ -40,17 +39,22 @@ def main():
         print('disconnected from server')
 
     try:
-        sio.connect('http://localhost:3000')
+        sio.connect('http://192.168.1.128:3000')
     except:
         print('Unable to open socket')
 
     while True:
-        terraController.readSensors()
-        terraController.actOnSensors()
-        jsonOutput = json.dumps(terraController.getChannelStates())
-        print(jsonOutput)
-        sio.emit('status', jsonOutput)
-        time.sleep(1)
+        try:
+            for i in range(0, len(terraController.channels)):
+                sio.emit('request setpoints', i)
+            terraController.readSensors()
+            terraController.actOnSensors()
+            jsonOutput = json.dumps(terraController.getChannelStates())
+            # print(jsonOutput)
+            sio.emit('status', jsonOutput)
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
 
 if __name__ == "__main__":
     main()

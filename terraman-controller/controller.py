@@ -36,10 +36,11 @@ class Controller:
         self.channels[index].updateMeasurements(temperature, humidity)
 
     def updateSetpoints(self, index, temperatureSetpoint, humiditySetpoint):
+        # print(index)
         self.channels[index].updateSetpoints(temperatureSetpoint, humiditySetpoint)
 
     def getChannelState(self, index):
-        return index, self.channels[index].getState()
+        return self.channels[index].getState()
 
     def enableLighting(self):
         self.relayController.turnOnChannel(self.bindings['lighting'])
