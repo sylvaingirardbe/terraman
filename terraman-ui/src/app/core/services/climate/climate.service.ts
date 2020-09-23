@@ -44,13 +44,17 @@ export class ClimateService {
 
     getSetpoint(): Observable<number> {
         return this.setPoint$.asObservable().pipe(
-            tap(setPoint => this.ipc.send('changeSetPoint', setPoint))
+            tap(setPoint => this.ipc.send('changeSetPoint', { 
+                index: 0,
+                temperature: setPoint,
+                humidity: 70
+            }))
         );
     }
 
     getSensorStatus(): Observable<ClimateStatus> {
         return this.status$.asObservable().pipe(
-            filter(status => !!status && !!status[0][3] && !!status[0][0]),
+            filter(status => !!status && !!status[0] && !!status[0][3] && !!status[0][0]),
             map(status => ({
                 humidity: status[0][3],
                 temp: status[0][0],
