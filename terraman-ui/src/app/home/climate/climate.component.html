@@ -1,7 +1,8 @@
 <terraman-climate 
-    *ngIf="status$ | async as status"
+    *ngFor="let status of status$ | async"
     [status]="status" 
-    [setPoint]="setPoint$ | async"
-    (increaseTemp)="increaseTemp($event)"
-    (decreaseTemp)="decreaseTemp($event)"
+    (increaseTemp)="increaseTemp(status.index, $event)"
+    (decreaseTemp)="decreaseTemp(status.index, $event)"
+    (increaseHumidity)="increaseHumidity(status.index, $event)"
+    (decreaseHumidity)="decreaseHumidity(status.index, $event)"
 ></terraman-climate>

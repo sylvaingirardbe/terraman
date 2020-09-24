@@ -9,8 +9,9 @@ import { LoggerService } from '../logger.service';
     providedIn: 'root'
 })
 export class ClimateService {
-    setPoint$ = new BehaviorSubject(30);
-    status$ = new BehaviorSubject<ClimateStatus>(null as ClimateStatus);
+    status$ = new BehaviorSubject<ClimateStatus[]>(null as []);
+
+    currentStatus: ClimateStatus[] = [];
 
     private ipc: IpcRenderer;
 
@@ -29,38 +30,55 @@ export class ClimateService {
 
         setInterval(() => this.ipc.send('requestStatus'), 1000);
         this.ipc.on('statusReceived', (event, args) => {
-            logger.log('Status received', args);
-            this.status$.next(args);
+            for(const index in args) {
+                this.currentStatus[index] = {
+                    index: +index,
+                    humidity: args[index][3],
+                    humiditySetpoint: args[index][4],
+                    temp: args[index][0],
+                    temperatureSetpoint: args[index][1],
+                    heating: args[index][2],
+                    misting: args[index][5]
+                } as ClimateStatus;
+            }
+            console.log('Emitting status', this.currentStatus);
+            this.status$.next(this.currentStatus);
+        });
+
+        this.status$.pipe(
+            filter(status => !!status)
+        )
+        .subscribe(s => {
+            s.forEach(status => this.ipc.send('changeSetPoint', { 
+                index: status.index,
+                temperature: status.temperatureSetpoint,
+                humidity: status.humiditySetpoint
+            }));
         });
     }
 
-    increaseSetpoint(amount: number) {
-        this.setPoint$.next(this.setPoint$.value + amount);
+    increaseTemperature(index, amount: number) {
+        this.currentStatus[index].temperatureSetpoint += amount;
+        this.status$.next(this.currentStatus);
     }
 
-    decreaseSetpoint(amount: number) {
-        this.setPoint$.next(this.setPoint$.value - amount);
+    decreaseTemperature(index, amount: number) {
+        this.currentStatus[index].temperatureSetpoint -= amount;
+        this.status$.next(this.currentStatus);
     }
 
-    getSetpoint(): Observable<number> {
-        return this.setPoint$.asObservable().pipe(
-            tap(setPoint => this.ipc.send('changeSetPoint', { 
-                index: 0,
-                temperature: setPoint,
-                humidity: 70
-            }))
-        );
+    increaseHumidity(index, amount: number) {
+        this.currentStatus[index].humiditySetpoint += amount;
+        this.status$.next(this.currentStatus);
     }
 
-    getSensorStatus(): Observable<ClimateStatus> {
-        return this.status$.asObservable().pipe(
-            filter(status => !!status && !!status[0] && !!status[0][3] && !!status[0][0]),
-            map(status => ({
-                humidity: status[0][3],
-                temp: status[0][0],
-                heating: status[0][2]
-            } as ClimateStatus)), 
-        );
+    decreaseHumidity(index, amount: number) {
+        this.currentStatus[index].humiditySetpoint -= amount;
+        this.status$.next(this.currentStatus);
+    }
+
+    getSensorStatus(): Observable<ClimateStatus[]> {
+        return this.status$.asObservable();
     }
 
     exit() {

@@ -9,8 +9,7 @@ import { ClimateStatus } from '../../core/services/climate/climate-status';
   styleUrls: ['./climate.component.scss']
 })
 export class ClimateComponent implements OnInit {
-  setPoint$: Observable<number>;
-  status$: Observable<ClimateStatus>;
+  status$: Observable<ClimateStatus[]>;
 
   constructor(
     private climateService: ClimateService,
@@ -19,14 +18,21 @@ export class ClimateComponent implements OnInit {
 
   ngOnInit(): void { 
     this.status$ = this.climateService.getSensorStatus();
-    this.setPoint$ = this.climateService.getSetpoint();
   }
 
-  decreaseTemp(amount: number) {
-    this.climateService.decreaseSetpoint(amount);
+  decreaseTemp(index, amount: number) {
+    this.climateService.decreaseTemperature(index, amount);
   }
 
-  increaseTemp(amount: number) {
-    this.climateService.increaseSetpoint(amount);
+  increaseTemp(index, amount: number) {
+    this.climateService.increaseTemperature(index, amount);
+  }
+  
+  decreaseHumidity(index, amount: number) {
+    this.climateService.decreaseHumidity(index, amount);
+  }
+
+  increaseHumidity(index, amount: number) {
+    this.climateService.increaseHumidity(index, amount);
   }
 }
