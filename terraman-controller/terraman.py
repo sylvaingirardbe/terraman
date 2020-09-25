@@ -19,10 +19,7 @@ def main():
 
     @sio.on('setpoints')
     def setpoints(data):
-        # index, temperature, humidity = data
-        # print(data['index'], data['humidity'], data['temperature'])
         terraController.updateSetpoints(data['index'], data['temperature'], data['humidity'])
-        # terraController.updateSetpoints(index, humidity, temperature)
 
     @sio.on('enable lighting')
     def enableLighting():
@@ -44,7 +41,9 @@ def main():
     try:
         sio.connect('http://192.168.1.128:3000')
     except:
-        print('Unable to open socket')
+        print('Unable to open socket. Retrying in 5 seconds...')
+        time.sleep(5)
+        main()
 
     while True:
         try:
@@ -53,7 +52,6 @@ def main():
             terraController.readSensors()
             terraController.actOnSensors()
             jsonOutput = json.dumps(terraController.getChannelStates())
-            # print(jsonOutput)
             sio.emit('status', jsonOutput)
             time.sleep(1)
         except KeyboardInterrupt:
