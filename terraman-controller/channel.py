@@ -44,4 +44,4 @@ class Channel:
         return self.heating, self.misting
 
     def getState(self):
-        return self.temperature, self.temperatureSetpoint, self.heating, self.humidity, self.humiditySetpoint, self.misting
+        return self.temperature, self.heating, self.humidity, self.misting

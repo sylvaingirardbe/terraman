@@ -1,11 +1,12 @@
 <div class="row justify-content-center mt-3">
-    <div class="col-3">
+    <div class="col-2">
         <div class="row align-items-center">
             <div class="col-8">
                 <div class="mx-auto text-center">Temperature</div>
                 <mwl-gauge [value]="status.temp" [max]="50" [animated]="true" [animationDuration]="1.5"></mwl-gauge>
                 <div class="mx-auto text-center">
-                    Setpoint: {{ status.temperatureSetpoint | number }}°C
+                    Setpoint: {{ setPoint.temperature | number }}°C
+                    <fa-icon [icon]="['fas', 'fire']" size="2x"></fa-icon>
                 </div>
             </div>
             <div class="col-4">
@@ -30,13 +31,14 @@
             </div>
         </div>
     </div>
-    <div class="col-3">
+    <div class="col-2">
         <div class="row align-items-center">
             <div class="col-8">
                 <div class="mx-auto text-center">Humidity</div>
                 <mwl-gauge [value]="status.humidity" [max]="100" [animated]="true" [animationDuration]="1.5"></mwl-gauge>
                 <div class="mx-auto text-center">
-                    Setpoint: {{ status.humiditySetpoint | number }}°C
+                    Setpoint: {{ setPoint.humidity | number }}°C
+                    <fa-icon [icon]="['fas', 'shower']" size="2x"></fa-icon>
                 </div>
             </div>
             <div class="col-4">

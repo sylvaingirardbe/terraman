@@ -1,9 +1,10 @@
+import { SetPoint } from './set-point';
+
 export interface ClimateStatus {
     index: number;
     temp: number;
     humidity: number;
-    temperatureSetpoint: number;
-    humiditySetpoint: number;
+    setPoint: SetPoint;
     heating: boolean;
     misting: boolean;
 }

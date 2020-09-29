@@ -25,6 +25,7 @@ io.on('connection', (socket) => {
   socket.on('status', (data) => {
     currentStatus = {
       ...JSON.parse(data)
+      
     };
   });
 
@@ -105,7 +106,8 @@ function createWindow(): BrowserWindow {
   });
 
   ipcMain.on('changeSetPoint', (event, newSetPoint) => {
-    setPoints[0] = newSetPoint;
+    console.log(newSetPoint);
+    setPoints[newSetPoint.index] = newSetPoint;
   });
 
   ipcMain.on('requestStatus', (event, _) => {

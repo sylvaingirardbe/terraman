@@ -1,8 +1,11 @@
-<terraman-climate 
-    *ngFor="let status of status$ | async"
-    [status]="status" 
-    (increaseTemp)="increaseTemp(status.index, $event)"
-    (decreaseTemp)="decreaseTemp(status.index, $event)"
-    (increaseHumidity)="increaseHumidity(status.index, $event)"
-    (decreaseHumidity)="decreaseHumidity(status.index, $event)"
-></terraman-climate>
+<div class="d-flex flex-wrap">
+    <terraman-climate 
+        *ngFor="let sensor of sensors$ | async; index as i"
+        [status]="sensor.status"
+        [setPoint]="sensor.setPoint"
+        (increaseTemp)="increaseTemp(i, $event)"
+        (decreaseTemp)="decreaseTemp(i, $event)"
+        (increaseHumidity)="increaseHumidity(i, $event)"
+        (decreaseHumidity)="decreaseHumidity(i, $event)"
+    ></terraman-climate>
+</div>

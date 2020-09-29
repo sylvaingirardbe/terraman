@@ -19,6 +19,7 @@ def main():
 
     @sio.on('setpoints')
     def setpoints(data):
+        print(data)
         terraController.updateSetpoints(data['index'], data['temperature'], data['humidity'])
 
     @sio.on('enable lighting')

@@ -1,21 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, tap, map } from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 import { IpcRenderer } from 'electron';
 import { ClimateStatus } from './climate-status';
 import { LoggerService } from '../logger.service';
+import { SetPoint } from './set-point';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ClimateService {
     status$ = new BehaviorSubject<ClimateStatus[]>(null as []);
-
+    setPoints$ = new BehaviorSubject<SetPoint[]>(null as []);
+    setPoints: SetPoint[] = [];
     currentStatus: ClimateStatus[] = [];
 
     private ipc: IpcRenderer;
 
-    constructor(private readonly logger: LoggerService) {
+    constructor(logger: LoggerService) {
         logger.log('ClimateService instantiated...');
 
         if ((<any>window).require) {
@@ -33,52 +35,80 @@ export class ClimateService {
             for(const index in args) {
                 this.currentStatus[index] = {
                     index: +index,
-                    humidity: args[index][3],
-                    humiditySetpoint: args[index][4],
+                    humidity: args[index][2],
                     temp: args[index][0],
-                    temperatureSetpoint: args[index][1],
-                    heating: args[index][2],
-                    misting: args[index][5]
+                    heating: args[index][1],
+                    misting: args[index][3]
                 } as ClimateStatus;
             }
             console.log('Emitting status', this.currentStatus);
             this.status$.next(this.currentStatus);
         });
 
-        this.status$.pipe(
-            filter(status => !!status)
+        this.setPoints$.pipe(
+            filter(setPoints => !!setPoints)
         )
         .subscribe(s => {
-            s.forEach(status => this.ipc.send('changeSetPoint', { 
-                index: status.index,
-                temperature: status.temperatureSetpoint,
-                humidity: status.humiditySetpoint
+            s.forEach((setPoint, i) => this.ipc.send('changeSetPoint', { 
+                index: i,   
+                temperature: setPoint.temperature,
+                humidity: setPoint.humidity
             }));
         });
+
+        //Initialize setPoints
+        this.status$.pipe(
+            filter(status => !!status),
+            first()
+        )
+        .subscribe(s => {
+            s.forEach(status => 
+                this.setPoints = [
+                    ...this.setPoints,
+                    {
+                        humidity: 70,
+                        temperature: 28
+                    } as SetPoint
+                ]
+            );
+            this.setPoints$.next(this.setPoints);
+        })
     }
 
     increaseTemperature(index, amount: number) {
-        this.currentStatus[index].temperatureSetpoint += amount;
-        this.status$.next(this.currentStatus);
+        this.setPoints[index].temperature += amount;
+        this.setPoints$.next(this.setPoints);
     }
 
     decreaseTemperature(index, amount: number) {
-        this.currentStatus[index].temperatureSetpoint -= amount;
-        this.status$.next(this.currentStatus);
+        this.setPoints[index].temperature -= amount;
+        this.setPoints$.next(this.setPoints);
     }
 
     increaseHumidity(index, amount: number) {
-        this.currentStatus[index].humiditySetpoint += amount;
-        this.status$.next(this.currentStatus);
+        this.setPoints[index].humidity += amount;
+        this.setPoints$.next(this.setPoints);
     }
 
     decreaseHumidity(index, amount: number) {
-        this.currentStatus[index].humiditySetpoint -= amount;
-        this.status$.next(this.currentStatus);
+        this.setPoints[index].humidity -= amount;
+        this.setPoints$.next(this.setPoints);
     }
 
     getSensorStatus(): Observable<ClimateStatus[]> {
-        return this.status$.asObservable();
+        return this.status$.pipe(
+            filter(status => 
+                !!status
+            )
+        );
+    }
+
+    getSetPoints(): Observable<SetPoint[]> {
+        return this.setPoints$.pipe(
+            filter(setPoint => 
+                !!setPoint
+            )
+        );
     }
 
     exit() {

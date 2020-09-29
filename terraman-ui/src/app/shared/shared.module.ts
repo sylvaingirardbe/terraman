@@ -10,6 +10,7 @@ import { ClimateComponent } from './components/climate/climate.component';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { GaugeModule } from 'angular-gauge';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [PageNotFoundComponent, ScheduleComponent, WebviewDirective, ClimateComponent],
@@ -22,6 +23,7 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
       provide: DateAdapter,
       useFactory: adapterFactory,
     }),
+    FontAwesomeModule,
   ],
   exports: [TranslateModule, WebviewDirective, FormsModule, ScheduleComponent, ClimateComponent]
 })

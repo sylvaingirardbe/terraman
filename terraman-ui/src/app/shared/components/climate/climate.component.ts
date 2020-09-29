@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { ClimateStatus } from '../../../core/services/climate/climate-status';
+import { SetPoint } from '../../../core/services/climate/set-point';
 
 @Component({
   selector: 'terraman-climate',
@@ -8,6 +9,7 @@ import { ClimateStatus } from '../../../core/services/climate/climate-status';
 })
 export class ClimateComponent implements OnInit {
   @Input() status: ClimateStatus;
+  @Input() setPoint: SetPoint;
   @Output() increaseTemp: EventEmitter<number> = new EventEmitter<number>();
   @Output() decreaseTemp: EventEmitter<number> = new EventEmitter<number>();
   @Output() increaseHumidity: EventEmitter<number> = new EventEmitter<number>();
@@ -17,5 +19,4 @@ export class ClimateComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
 }
