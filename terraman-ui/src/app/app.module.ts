@@ -17,8 +17,9 @@ import { AppComponent } from './app.component';
 import { ClimateService } from './core/services/climate/climate.service';
 import { registerLocaleData } from '@angular/common';
 import localeNlBe from '@angular/common/locales/nl-BE';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
@@ -53,4 +54,8 @@ registerLocaleData(localeNlBe, 'nl-BE');
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule {
+  constructor(library: FaIconLibrary) {
+    library.addIconPacks(fas);
+  }
+}

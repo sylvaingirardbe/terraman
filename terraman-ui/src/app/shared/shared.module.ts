@@ -10,7 +10,8 @@ import { ClimateComponent } from './components/climate/climate.component';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { GaugeModule } from 'angular-gauge';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 
 @NgModule({
   declarations: [PageNotFoundComponent, ScheduleComponent, WebviewDirective, ClimateComponent],
@@ -23,8 +24,11 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
       provide: DateAdapter,
       useFactory: adapterFactory,
     }),
-    FontAwesomeModule,
+    FontAwesomeModule
   ],
   exports: [TranslateModule, WebviewDirective, FormsModule, ScheduleComponent, ClimateComponent]
 })
-export class SharedModule { }
+
+export class SharedModule { 
+  
+}
