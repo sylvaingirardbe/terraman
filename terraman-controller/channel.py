@@ -39,7 +39,11 @@ class Channel:
     def __actOnError(self):
         self.heating = self.pid.last_error > 0
         self.misting = (self.humiditySetpoint - self.humidity > 10) and not self.misting or (self.humiditySetpoint - self.humidity > -10) and self.misting
-    
+                            # 70            -          70                        False             70             -         70                      False False
+                            # 70            -          70                        True              70             -         70                      True  True
+                            # 70            -          81                        True              70             -         81                      True  False
+                            # 70            -          59                        True              70             -         59                      True  True
+
     def getAcuations(self):
         return self.heating, self.misting
 

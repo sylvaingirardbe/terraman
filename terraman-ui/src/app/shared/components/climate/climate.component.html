@@ -1,12 +1,12 @@
 <div class="row justify-content-center mt-3">
-    <div class="col-3s">
+    <div class="col-5">
         <div class="row align-items-center">
             <div class="col-8">
                 <div class="mx-auto text-center">Temperature</div>
                 <mwl-gauge [value]="status.temp" [max]="50" [animated]="true" [animationDuration]="1.5"></mwl-gauge>
                 <div class="mx-auto text-center">
                     Setpoint: {{ setPoint.temperature | number }}°C
-                    <fa-icon [icon]="faFire" size="2x"></fa-icon>
+                    <fa-icon [icon]="faFire" size="2x" *ngIf="status.heating"></fa-icon>
                 </div>
             </div>
             <div class="col-4">
@@ -31,14 +31,14 @@
             </div>
         </div>
     </div>
-    <div class="col-3">
+    <div class="col-5">
         <div class="row align-items-center">
             <div class="col-8">
                 <div class="mx-auto text-center">Humidity</div>
                 <mwl-gauge [value]="status.humidity" [max]="100" [animated]="true" [animationDuration]="1.5"></mwl-gauge>
                 <div class="mx-auto text-center">
                     Setpoint: {{ setPoint.humidity | number }}°C
-                    <fa-icon [icon]="faShower" size="2x"></fa-icon>
+                    <fa-icon [icon]="faShower" size="2x" *ngIf="status.misting"></fa-icon>
                 </div>
             </div>
             <div class="col-4">

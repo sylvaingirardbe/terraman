@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, tap } from 'rxjs/operators';
 import { IpcRenderer } from 'electron';
 import { ClimateStatus } from './climate-status';
 import { LoggerService } from '../logger.service';
@@ -41,8 +41,7 @@ export class ClimateService {
                     misting: args[index][3]
                 } as ClimateStatus;
             }
-            console.log('Emitting status', this.currentStatus);
-            this.status$.next(this.currentStatus);
+            this.status$.next([...this.currentStatus]);
         });
 
         this.setPoints$.pipe(
@@ -62,7 +61,7 @@ export class ClimateService {
             first()
         )
         .subscribe(s => {
-            s.forEach(status => 
+            s.forEach(_ => {
                 this.setPoints = [
                     ...this.setPoints,
                     {
@@ -70,8 +69,9 @@ export class ClimateService {
                         temperature: 28
                     } as SetPoint
                 ]
-            );
-            this.setPoints$.next(this.setPoints);
+            });
+            
+            this.setPoints$.next([...this.setPoints]);
         })
     }
 
@@ -99,7 +99,11 @@ export class ClimateService {
         return this.status$.pipe(
             filter(status => 
                 !!status
-            )
+            ),
+            distinctUntilChanged((x, y) => 
+                JSON.stringify(x) === JSON.stringify(y)
+            ),
+            tap(status => console.log('After distinct status', status))
         );
     }
 
